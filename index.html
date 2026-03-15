@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Eco Quest 8-Bit: IGCSE Career Climb</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="game-shell">
+    <header class="hud-top">
+      <div class="title-wrap">
+        <h1>Eco Quest 8-Bit</h1>
+        <p class="subtitle">IGCSE Economics + Business Career RPG</p>
+      </div>
+      <div class="stats-wrap">
+        <div class="stat"><span>Level</span><strong id="hud-level">Desk Worker</strong></div>
+        <div class="stat"><span>Completed</span><strong id="hud-progress">0/5</strong></div>
+        <div class="stat"><span>Time</span><strong id="hud-time">00:00</strong></div>
+        <div class="stat"><span>Streak</span><strong id="hud-streak">x0</strong></div>
+      </div>
+    </header>
+
+    <section class="play-area">
+      <div class="canvas-frame">
+        <canvas id="game-canvas" width="640" height="480" aria-label="Retro educational game"></canvas>
+
+        <div id="message-box" class="message-box hidden" role="status" aria-live="polite">
+          <h2 id="message-title">Career Notice</h2>
+          <p id="message-text"></p>
+          <button id="message-btn" class="pixel-btn">Continue</button>
+        </div>
+
+        <div id="question-modal" class="question-modal hidden" role="dialog" aria-modal="true" aria-labelledby="question-title">
+          <h2 id="question-title">Question</h2>
+          <p id="question-text"></p>
+          <div id="options-wrap" class="options-wrap"></div>
+          <p id="question-feedback" class="question-feedback"></p>
+          <button id="question-close" class="pixel-btn small hidden">Back</button>
+        </div>
+
+        <div id="end-screen" class="end-screen hidden" role="dialog" aria-modal="true">
+          <h2>Promotion Complete</h2>
+          <p>You reached CEO and mastered the office ladder.</p>
+          <p class="final-time">Total Time: <strong id="final-time">00:00</strong></p>
+          <p id="final-summary"></p>
+          <button id="restart-btn" class="pixel-btn">Play Again</button>
+        </div>
+      </div>
+
+      <aside class="controls-panel">
+        <p class="hint">Move: Arrow Keys / WASD / Joystick</p>
+        <p class="hint">Interact: E / Enter / INTERACT button</p>
+        <p class="hint">Speak to all 5 colleagues to earn each promotion.</p>
+      </aside>
+    </section>
+
+    <section class="touch-controls" aria-label="Touch controls">
+      <div id="joystick" class="joystick" aria-hidden="true">
+        <div id="stick" class="stick"></div>
+      </div>
+      <button id="touch-interact" class="pixel-btn interact-touch">INTERACT</button>
+    </section>
+  </main>
+
+  <script src="game.js"></script>
+</body>
+</html>
