@@ -209,7 +209,7 @@ const LEVELS = [
       "#..................#",
       "#...P....D.....P...#",
       "#..................#",
-      "#..D..######..D....#",
+      "#..D..####....D....#",
       "#..................#",
       "#...P....D.....P...#",
       "#..................#",
@@ -264,7 +264,7 @@ const LEVELS = [
       "#..................#",
       "#....P....D....P...#",
       "#..................#",
-      "#..D...######...D..#",
+      "#..D...###.###..D..#",
       "#..................#",
       "#....P....D....P...#",
       "#..................#",
@@ -395,10 +395,15 @@ function showQuestion(npc) {
   questionClose.classList.add("hidden");
 
   optionsWrap.innerHTML = "";
-  npc.question.options.forEach((opt, idx) => {
+  const shuffled = npc.question.options.map((opt, idx) => ({ opt, idx }));
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  shuffled.forEach(({ opt, idx }, displayIdx) => {
     const btn = document.createElement("button");
     btn.className = "pixel-btn";
-    btn.textContent = `${String.fromCharCode(65 + idx)}. ${opt}`;
+    btn.textContent = `${String.fromCharCode(65 + displayIdx)}. ${opt}`;
     btn.addEventListener("click", () => handleAnswer(idx));
     optionsWrap.appendChild(btn);
   });
@@ -928,6 +933,20 @@ messageBtn.addEventListener("keydown", (e) => {
 });
 
 restartBtn.addEventListener("click", resetGame);
+
+const fsBtn = document.getElementById("fs-btn");
+if (fsBtn) {
+  fsBtn.addEventListener("click", () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen();
+    }
+  });
+  document.addEventListener("fullscreenchange", () => {
+    fsBtn.textContent = document.fullscreenElement ? "⛶ EXIT" : "⛶ FULL";
+  });
+}
 
 loadLevel(0);
 showMessage(
