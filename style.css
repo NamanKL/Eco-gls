@@ -83,6 +83,17 @@ body {
   line-height: 1.4;
 }
 
+.hud-actions {
+  display: flex;
+  align-items: center;
+}
+
+.fs-btn {
+  font-size: clamp(0.5rem, 1.4vw, 0.65rem);
+  padding: 0.5rem 0.7rem;
+  white-space: nowrap;
+}
+
 .play-area {
   margin-top: 1rem;
   display: grid;
@@ -249,7 +260,7 @@ body {
   }
 }
 
-@media (min-width: 1100px) {
+@media (min-width: 1100px) and (hover: hover) and (pointer: fine) {
   .touch-controls {
     display: none;
   }
