@@ -25,6 +25,7 @@ const restartBtn = document.getElementById("restart-btn");
 const touchInteract = document.getElementById("touch-interact");
 const joystick = document.getElementById("joystick");
 const stick = document.getElementById("stick");
+const gameShell = document.querySelector(".game-shell");
 
 const TILE = 32;
 const MAP_W = 20;
@@ -326,7 +327,7 @@ const state = {
     facing: "down"
   },
   keys: {},
-  joystick: { active: false, dx: 0, dy: 0 },
+  joystick: { active: false, dx: 0, dy: 0, pointerId: null, touchId: null, sx: 0, sy: 0 },
   activeNpc: null,
   modalOpen: false,
   gameOver: false,
@@ -732,6 +733,7 @@ function render() {
 }
 
 let last = performance.now();
+let lastRenderedSecond = -1;
 function loop(now) {
   const dt = Math.min(0.033, (now - last) / 1000);
   last = now;
@@ -740,7 +742,11 @@ function loop(now) {
   if (state.timerStarted && !state.gameOver) {
     state.elapsedMs = Date.now() - state.startTime;
   }
-  hudTime.textContent = formatTime(state.elapsedMs);
+  const currentSecond = Math.floor(state.elapsedMs / 1000);
+  if (currentSecond !== lastRenderedSecond) {
+    hudTime.textContent = formatTime(state.elapsedMs);
+    lastRenderedSecond = currentSecond;
+  }
 
   render();
   requestAnimationFrame(loop);
@@ -882,6 +888,15 @@ touchInteract.addEventListener("pointerdown", (e) => {
   interact();
 });
 
+touchInteract.addEventListener(
+  "touchstart",
+  (e) => {
+    e.preventDefault();
+    interact();
+  },
+  { passive: false }
+);
+
 function updateStick(clientX, clientY) {
   const rect = joystick.getBoundingClientRect();
   const cx = rect.left + rect.width / 2;
@@ -895,8 +910,9 @@ function updateStick(clientX, clientY) {
   const sx = dx * clamped;
   const sy = dy * clamped;
 
-  stick.style.left = `${31 + (sx / max) * 31}%`;
-  stick.style.top = `${31 + (sy / max) * 31}%`;
+  state.joystick.sx = sx;
+  state.joystick.sy = sy;
+  stick.style.transform = `translate(calc(-50% + ${sx}px), calc(-50% + ${sy}px))`;
 
   state.joystick.dx = sx / max;
   state.joystick.dy = sy / max;
@@ -906,24 +922,86 @@ joystick.addEventListener("pointerdown", (e) => {
   e.preventDefault();
   joystick.setPointerCapture(e.pointerId);
   state.joystick.active = true;
+  state.joystick.pointerId = e.pointerId;
   updateStick(e.clientX, e.clientY);
 });
 
 joystick.addEventListener("pointermove", (e) => {
-  if (!state.joystick.active) return;
+  if (!state.joystick.active || state.joystick.pointerId !== e.pointerId) return;
   updateStick(e.clientX, e.clientY);
 });
 
 function resetStick() {
   state.joystick.active = false;
+  state.joystick.pointerId = null;
+  state.joystick.touchId = null;
   state.joystick.dx = 0;
   state.joystick.dy = 0;
-  stick.style.left = "31%";
-  stick.style.top = "31%";
+  state.joystick.sx = 0;
+  state.joystick.sy = 0;
+  stick.style.transform = "translate(-50%, -50%)";
 }
 
-joystick.addEventListener("pointerup", resetStick);
-joystick.addEventListener("pointercancel", resetStick);
+joystick.addEventListener("pointerup", (e) => {
+  if (state.joystick.pointerId !== e.pointerId) return;
+  resetStick();
+});
+joystick.addEventListener("pointercancel", (e) => {
+  if (state.joystick.pointerId !== e.pointerId) return;
+  resetStick();
+});
+joystick.addEventListener("pointerleave", (e) => {
+  if (state.joystick.pointerId !== e.pointerId) return;
+  resetStick();
+});
+
+joystick.addEventListener(
+  "touchstart",
+  (e) => {
+    if (!e.changedTouches.length || state.joystick.active) return;
+    e.preventDefault();
+    const touch = e.changedTouches[0];
+    state.joystick.active = true;
+    state.joystick.touchId = touch.identifier;
+    updateStick(touch.clientX, touch.clientY);
+  },
+  { passive: false }
+);
+
+joystick.addEventListener(
+  "touchmove",
+  (e) => {
+    if (!state.joystick.active || state.joystick.touchId === null) return;
+    const touch = [...e.changedTouches].find((t) => t.identifier === state.joystick.touchId);
+    if (!touch) return;
+    e.preventDefault();
+    updateStick(touch.clientX, touch.clientY);
+  },
+  { passive: false }
+);
+
+joystick.addEventListener(
+  "touchend",
+  (e) => {
+    if (!state.joystick.active || state.joystick.touchId === null) return;
+    const ended = [...e.changedTouches].some((t) => t.identifier === state.joystick.touchId);
+    if (!ended) return;
+    e.preventDefault();
+    resetStick();
+  },
+  { passive: false }
+);
+
+joystick.addEventListener(
+  "touchcancel",
+  (e) => {
+    if (!state.joystick.active || state.joystick.touchId === null) return;
+    const canceled = [...e.changedTouches].some((t) => t.identifier === state.joystick.touchId);
+    if (!canceled) return;
+    resetStick();
+  },
+  { passive: false }
+);
 
 messageBtn.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
@@ -935,6 +1013,21 @@ messageBtn.addEventListener("keydown", (e) => {
 restartBtn.addEventListener("click", resetGame);
 
 const fsBtn = document.getElementById("fs-btn");
+function updateViewportHeight() {
+  const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  document.documentElement.style.setProperty("--vh", `${viewportHeight * 0.01}px`);
+}
+
+function preventTouchScroll(e) {
+  if (!gameShell || !gameShell.contains(e.target)) {
+    return;
+  }
+  if (e.target.closest("#question-modal")) {
+    return;
+  }
+  e.preventDefault();
+}
+
 if (fsBtn) {
   fsBtn.addEventListener("click", () => {
     if (!document.fullscreenElement) {
@@ -945,8 +1038,18 @@ if (fsBtn) {
   });
   document.addEventListener("fullscreenchange", () => {
     fsBtn.textContent = document.fullscreenElement ? "⛶ EXIT" : "⛶ FULL";
+    updateViewportHeight();
   });
 }
+
+window.addEventListener("resize", updateViewportHeight);
+window.addEventListener("orientationchange", updateViewportHeight);
+if (window.visualViewport) {
+  window.visualViewport.addEventListener("resize", updateViewportHeight);
+}
+document.addEventListener("touchmove", preventTouchScroll, { passive: false });
+document.addEventListener("gesturestart", preventTouchScroll, { passive: false });
+updateViewportHeight();
 
 loadLevel(0);
 showMessage(

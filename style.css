@@ -16,7 +16,9 @@
 html,
 body {
   margin: 0;
-  min-height: 100%;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
   background:
     radial-gradient(circle at 20% 20%, #e6c981 0%, rgba(230, 201, 129, 0.2) 40%),
     radial-gradient(circle at 80% 10%, rgba(121, 35, 31, 0.5) 0%, rgba(121, 35, 31, 0) 50%),
@@ -27,8 +29,16 @@ body {
 
 .game-shell {
   width: min(1100px, 100vw);
+  height: calc(var(--vh, 1vh) * 100);
   margin: 0 auto;
-  padding: 1rem clamp(0.7rem, 2vw, 1.2rem) max(1rem, env(safe-area-inset-bottom));
+  padding:
+    max(0.6rem, env(safe-area-inset-top))
+    max(0.7rem, env(safe-area-inset-right))
+    max(0.8rem, env(safe-area-inset-bottom))
+    max(0.7rem, env(safe-area-inset-left));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .hud-top {
@@ -100,10 +110,15 @@ body {
   grid-template-columns: minmax(0, 1fr) 220px;
   gap: 1rem;
   align-items: start;
+  min-height: 0;
+  flex: 1;
 }
 
 .canvas-frame {
   position: relative;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 4 / 3;
   border: 8px solid #2b0f0d;
   box-shadow: 0 0 0 5px #8e5938, 0 14px 30px rgba(0, 0, 0, 0.35);
   background: #1f1612;
@@ -113,7 +128,7 @@ body {
 
 #game-canvas {
   width: 100%;
-  height: auto;
+  height: 100%;
   display: block;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
@@ -216,11 +231,15 @@ body {
 }
 
 .touch-controls {
-  margin-top: 0.85rem;
+  position: fixed;
+  left: max(0.85rem, env(safe-area-inset-left));
+  right: max(0.85rem, env(safe-area-inset-right));
+  bottom: max(0.85rem, env(safe-area-inset-bottom));
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  gap: 1rem;
+  pointer-events: none;
+  z-index: 4;
 }
 
 .joystick {
@@ -232,6 +251,8 @@ body {
     radial-gradient(circle at 30% 25%, #f4dfb4 0%, #c99757 55%, #8d5d34 100%);
   position: relative;
   box-shadow: inset 0 6px 8px rgba(255, 255, 255, 0.2), inset 0 -10px 15px rgba(0, 0, 0, 0.3);
+  pointer-events: auto;
+  touch-action: none;
 }
 
 .stick {
@@ -239,15 +260,19 @@ body {
   aspect-ratio: 1;
   border-radius: 50%;
   position: absolute;
-  left: 31%;
-  top: 31%;
+  left: 50%;
+  top: 50%;
   border: 3px solid #2f100b;
   background: radial-gradient(circle at 30% 30%, #f8d273 0%, #b06a34 100%);
+  transform: translate(-50%, -50%);
+  will-change: transform;
 }
 
 .interact-touch {
   min-width: min(34vw, 220px);
   min-height: 78px;
+  pointer-events: auto;
+  touch-action: manipulation;
 }
 
 @media (max-width: 980px) {
@@ -257,6 +282,7 @@ body {
 
   .controls-panel {
     order: -1;
+    min-height: 0;
   }
 }
 
@@ -279,9 +305,11 @@ body {
     grid-template-columns: repeat(2, minmax(120px, 1fr));
   }
 
-  .touch-controls {
-    position: sticky;
-    bottom: 0;
-    padding-bottom: env(safe-area-inset-bottom);
+  .joystick {
+    width: min(34vw, 150px);
+  }
+
+  .interact-touch {
+    min-height: 66px;
   }
 }
