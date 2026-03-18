@@ -733,7 +733,7 @@ function render() {
 }
 
 let last = performance.now();
-let lastHudSecond = -1;
+let lastRenderedSecond = -1;
 function loop(now) {
   const dt = Math.min(0.033, (now - last) / 1000);
   last = now;
@@ -743,9 +743,9 @@ function loop(now) {
     state.elapsedMs = Date.now() - state.startTime;
   }
   const currentSecond = Math.floor(state.elapsedMs / 1000);
-  if (currentSecond !== lastHudSecond) {
+  if (currentSecond !== lastRenderedSecond) {
     hudTime.textContent = formatTime(state.elapsedMs);
-    lastHudSecond = currentSecond;
+    lastRenderedSecond = currentSecond;
   }
 
   render();
