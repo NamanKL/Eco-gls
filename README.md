@@ -10,8 +10,12 @@ Eco Quest 8-Bit is a web-based retro RPG-style educational game that teaches IGC
 - 5 NPCs per level, each with one multiple-choice economics/business question
 - Retry-on-wrong-answer flow and completion tracking per NPC
 - Progressive difficulty across 25 total questions
+- Difficulty selection at start (PYP or Secondary question banks)
+- Player profile start flow (name input) with local leaderboard (fastest times)
+- Lives system (3 lives) with game-over restart flow
+- Hint system (2 hints per level) that removes wrong options
 - Timer from game start to CEO completion
-- Final completion screen with total time
+- Final completion screen with name, total time, lives used, and leaderboard
 - Keyboard and iPad-friendly touch controls (on-screen joystick + interact button)
 - Retro synthesized sound effects and looping chiptune background music
 
@@ -31,6 +35,7 @@ python3 -m http.server 8000
 - Move: Arrow Keys or WASD
 - Interact with NPC: E or Enter
 - Touch devices: left joystick to move, INTERACT button to talk
+- In questions: use HINT button to remove two wrong options (limited per level)
 
 ## File overview
 
