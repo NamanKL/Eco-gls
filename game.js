@@ -5,6 +5,8 @@ const hudLevel = document.getElementById("hud-level");
 const hudProgress = document.getElementById("hud-progress");
 const hudTime = document.getElementById("hud-time");
 const hudStreak = document.getElementById("hud-streak");
+const hudLives = document.getElementById("hud-lives");
+const hudHints = document.getElementById("hud-hints");
 
 const messageBox = document.getElementById("message-box");
 const messageTitle = document.getElementById("message-title");
@@ -16,16 +18,24 @@ const questionText = document.getElementById("question-text");
 const optionsWrap = document.getElementById("options-wrap");
 const questionFeedback = document.getElementById("question-feedback");
 const questionClose = document.getElementById("question-close");
+const hintBtn = document.getElementById("hint-btn");
 
 const endScreen = document.getElementById("end-screen");
+const endTitle = document.getElementById("end-title");
+const endLead = document.getElementById("end-lead");
 const finalTime = document.getElementById("final-time");
 const finalSummary = document.getElementById("final-summary");
+const leaderboard = document.getElementById("leaderboard");
 const restartBtn = document.getElementById("restart-btn");
 
 const touchInteract = document.getElementById("touch-interact");
+const touchHint = document.getElementById("touch-hint");
 const joystick = document.getElementById("joystick");
 const stick = document.getElementById("stick");
 const gameShell = document.querySelector(".game-shell");
+const startScreen = document.getElementById("start-screen");
+const playerNameInput = document.getElementById("player-name");
+const difficultyButtons = [...document.querySelectorAll(".difficulty-btn")];
 
 const TILE = 32;
 const MAP_W = 20;
@@ -309,6 +319,173 @@ const LEVELS = [
   }
 ];
 
+const SECONDARY_QUESTION_BANK = LEVELS.map((level) =>
+  level.questions.map((q) => ({ ...q, options: [...q.options] }))
+);
+
+const PYP_QUESTION_BANK = [
+  [
+    {
+      q: "Demand goes up and supply stays the same. Price will usually:",
+      options: ["Go down", "Go up", "Stay the same", "Be zero"],
+      answer: 1,
+      explain: "When more people want the product, sellers can charge a higher price."
+    },
+    {
+      q: "Opportunity cost means:",
+      options: ["Only money spent", "The next best choice you gave up", "All business costs", "A fixed payment"],
+      answer: 1,
+      explain: "It is what you miss out on when picking one option over another."
+    },
+    {
+      q: "Most private businesses mainly try to:",
+      options: ["Make profit", "Collect taxes", "Run elections", "Write laws"],
+      answer: 0,
+      explain: "Private businesses usually aim to earn profit over time."
+    },
+    {
+      q: "Revenue is:",
+      options: ["Total cost", "Money from sales", "Only profit", "Only cash at bank"],
+      answer: 1,
+      explain: "Revenue is the total sales income."
+    },
+    {
+      q: "Marketing helps a business to:",
+      options: ["Ignore customers", "Meet customer needs", "Stop all competition", "Raise all prices forever"],
+      answer: 1,
+      explain: "Good marketing finds out what customers want and serves them."
+    }
+  ],
+  [
+    {
+      q: "If price is above equilibrium, the market has:",
+      options: ["Shortage", "Surplus", "No goods", "No buyers"],
+      answer: 1,
+      explain: "High prices often leave unsold goods, which is a surplus."
+    },
+    {
+      q: "Which is a variable cost for a bakery?",
+      options: ["Rent", "Flour per loaf", "Insurance", "Building loan"],
+      answer: 1,
+      explain: "Flour use changes with output."
+    },
+    {
+      q: "Profit =",
+      options: ["Revenue - total costs", "Revenue + costs", "Costs - revenue", "Price ÷ quantity"],
+      answer: 0,
+      explain: "Profit is what remains after all costs are subtracted."
+    },
+    {
+      q: "A USP is mainly used to:",
+      options: ["Copy rivals", "Stand out from rivals", "Close the business", "Reduce demand"],
+      answer: 1,
+      explain: "USP makes the business different and memorable."
+    },
+    {
+      q: "A common advantage of sole trader businesses is:",
+      options: ["Unlimited liability", "Fast decisions", "No risk", "Guaranteed profit"],
+      answer: 1,
+      explain: "One owner can usually decide quickly."
+    }
+  ],
+  [
+    {
+      q: "In monopolistic competition, firms often compete by:",
+      options: ["Selling identical products only", "Branding and product differences", "Stopping advertising", "Government control"],
+      answer: 1,
+      explain: "They try to look different to attract customers."
+    },
+    {
+      q: "Economies of scale mean average costs can:",
+      options: ["Go up with output", "Go down with output", "Never change", "Always be zero"],
+      answer: 1,
+      explain: "Larger production can spread costs and lower average cost."
+    },
+    {
+      q: "To grow market share, a business may:",
+      options: ["Never promote", "Use competitive pricing and promotion", "Ignore customers", "Stop improving products"],
+      answer: 1,
+      explain: "Pricing and promotion can attract more buyers."
+    },
+    {
+      q: "Contribution per unit =",
+      options: ["Selling price - variable cost", "Fixed cost - profit", "Revenue ÷ workers", "Assets - liabilities"],
+      answer: 0,
+      explain: "Contribution helps cover fixed costs first."
+    },
+    {
+      q: "An entrepreneur usually:",
+      options: ["Avoids all risk", "Organizes resources and takes risk", "Never innovates", "Only works for government"],
+      answer: 1,
+      explain: "Entrepreneurs bring ideas together and accept uncertainty."
+    }
+  ],
+  [
+    {
+      q: "In an oligopoly, firms are interdependent because:",
+      options: ["One firm's actions affect rivals", "Only one seller exists", "Government sets all prices", "Products are always free"],
+      answer: 0,
+      explain: "Big firms watch each other closely and respond."
+    },
+    {
+      q: "Break-even is when:",
+      options: ["Total revenue = total cost", "Revenue is zero", "Profit is highest", "Fixed costs are zero"],
+      answer: 0,
+      explain: "At break-even, profit is zero."
+    },
+    {
+      q: "A social enterprise aims for profit and:",
+      options: ["No mission", "Social/environment goals", "Monopoly power only", "Lower quality only"],
+      answer: 1,
+      explain: "It balances money goals with positive impact."
+    },
+    {
+      q: "If PED is greater than 1, demand is:",
+      options: ["Inelastic", "Perfectly fixed", "Elastic", "Always negative"],
+      answer: 2,
+      explain: "Elastic demand changes a lot when price changes."
+    },
+    {
+      q: "High gearing means:",
+      options: ["High debt compared with equity", "No long-term finance", "Only retained profit", "No liabilities"],
+      answer: 0,
+      explain: "Gearing measures how much debt finance is used."
+    }
+  ],
+  [
+    {
+      q: "If marginal cost is below average cost, average cost will:",
+      options: ["Rise", "Fall", "Stay the same", "Become zero"],
+      answer: 1,
+      explain: "A lower marginal value pulls the average down."
+    },
+    {
+      q: "Predatory pricing is most linked with:",
+      options: ["Perfect competition", "Dominant firms", "Charities only", "Small local markets only"],
+      answer: 1,
+      explain: "Powerful firms can undercut rivals to push them out."
+    },
+    {
+      q: "A likely long-run objective for a multinational is:",
+      options: ["Sustainable growth and value", "One-day sales only", "No reinvestment", "Lower quality always"],
+      answer: 0,
+      explain: "Large firms usually focus on long-term growth and returns."
+    },
+    {
+      q: "Higher productivity means:",
+      options: ["More output per input", "Only higher fixed cost", "Always lower sales", "More waste"],
+      answer: 0,
+      explain: "Productivity is how efficiently inputs create output."
+    },
+    {
+      q: "Opportunity cost of using capital is the:",
+      options: ["Past sunk cost", "Next best return given up", "Depreciation only", "GDP growth rate"],
+      answer: 1,
+      explain: "Choosing one investment means giving up another return."
+    }
+  ]
+];
+
 const NPC_POSITIONS = [
   { x: 3, y: 2 },
   { x: 16, y: 2 },
@@ -319,6 +496,8 @@ const NPC_POSITIONS = [
 
 const state = {
   levelIndex: 0,
+  playerName: "",
+  difficulty: "Secondary",
   npcs: [],
   player: {
     x: 10 * TILE,
@@ -335,7 +514,13 @@ const state = {
   startTime: 0,
   elapsedMs: 0,
   streak: 0,
-  questionsAnswered: 0
+  questionsAnswered: 0,
+  lives: 3,
+  hintsLeft: 2,
+  hintsUsed: 0,
+  gameStarted: false,
+  gameOverReason: "",
+  optionsState: null
 };
 
 const audio = {
@@ -370,6 +555,10 @@ function createNpcSet(level) {
   }));
 }
 
+function getQuestionBank(levelIndex) {
+  return state.difficulty === "PYP" ? PYP_QUESTION_BANK[levelIndex] : SECONDARY_QUESTION_BANK[levelIndex];
+}
+
 function showMessage(title, text, cb) {
   state.modalOpen = true;
   messageTitle.textContent = title;
@@ -401,19 +590,160 @@ function showQuestion(npc) {
     const j = Math.floor(Math.random() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
-  shuffled.forEach(({ opt, idx }, displayIdx) => {
+  state.optionsState = shuffled.map(({ opt, idx }) => ({ opt, idx, eliminated: false }));
+  renderOptions();
+  updateHintButtons();
+}
+
+function renderOptions() {
+  optionsWrap.innerHTML = "";
+  if (!state.optionsState) return;
+  state.optionsState.forEach(({ opt, idx, eliminated }, displayIdx) => {
     const btn = document.createElement("button");
     btn.className = "pixel-btn";
     btn.textContent = `${String.fromCharCode(65 + displayIdx)}. ${opt}`;
-    btn.addEventListener("click", () => handleAnswer(idx));
+    if (eliminated) {
+      btn.disabled = true;
+      btn.style.opacity = "0.55";
+    } else {
+      btn.addEventListener("click", () => handleAnswer(idx));
+    }
     optionsWrap.appendChild(btn);
   });
 }
+
+function useHint() {
+  const npc = state.activeNpc;
+  if (!npc || npc.completed || state.hintsLeft <= 0 || !state.optionsState) return;
+
+  const wrongIndexes = [];
+  state.optionsState.forEach((item, i) => {
+    if (!item.eliminated && item.idx !== npc.question.answer) wrongIndexes.push(i);
+  });
+  if (!wrongIndexes.length) return;
+
+  state.hintsLeft -= 1;
+  state.hintsUsed += 1;
+
+  for (let removed = 0; removed < 2 && wrongIndexes.length > 0; removed += 1) {
+    const pick = Math.floor(Math.random() * wrongIndexes.length);
+    const optionIndex = wrongIndexes.splice(pick, 1)[0];
+    state.optionsState[optionIndex].eliminated = true;
+  }
+
+  questionFeedback.classList.remove("wrong");
+  questionFeedback.textContent = "Hint used: two wrong options removed.";
+  renderOptions();
+  updateHUD();
+  updateHintButtons();
+}
+
+function updateHintButtons() {
+  const disabled = state.hintsLeft <= 0 || !state.modalOpen || !state.activeNpc || state.activeNpc.completed;
+  if (hintBtn) {
+    hintBtn.disabled = disabled;
+    hintBtn.textContent = disabled ? "No Hints Left" : `Use Hint (${state.hintsLeft} left)`;
+  }
+  if (touchHint) {
+    touchHint.disabled = disabled;
+    touchHint.textContent = disabled ? "NO HINTS" : `HINT (${state.hintsLeft})`;
+  }
+}
+
+function endGameWithLoss() {
+  state.gameOver = true;
+  state.gameOverReason = "loss";
+  if (state.timerStarted) {
+    state.elapsedMs = Date.now() - state.startTime;
+  }
+
+  endTitle.textContent = "Game Over";
+  endLead.textContent = "You ran out of lives. Restart and try the climb again.";
+  finalTime.textContent = formatTime(state.elapsedMs);
+  const livesUsed = Math.max(0, 3 - state.lives);
+  finalSummary.textContent = `${state.playerName || "Player"} | Difficulty: ${state.difficulty} | Lives used: ${livesUsed}/3`;
+  if (leaderboard) {
+    leaderboard.innerHTML = "";
+  }
+  endScreen.classList.remove("hidden");
+}
+
+function saveResultEntry() {
+  const entry = {
+    name: state.playerName || "Player",
+    difficulty: state.difficulty,
+    timeMs: state.elapsedMs,
+    livesUsed: Math.max(0, 3 - state.lives),
+    date: new Date().toISOString()
+  };
+  const key = "ecoQuestLeaderboard";
+  const existing = JSON.parse(localStorage.getItem(key) || "[]");
+  const next = [...existing, entry]
+    .sort((a, b) => a.timeMs - b.timeMs)
+    .slice(0, 10);
+  localStorage.setItem(key, JSON.stringify(next));
+  return next;
+}
+
+function drawLeaderboard(entries) {
+  if (!leaderboard) return;
+  if (!entries.length) {
+    leaderboard.innerHTML = "<p>No leaderboard entries yet.</p>";
+    return;
+  }
+  leaderboard.innerHTML = entries
+    .map(
+      (entry, i) =>
+        `<p>${i + 1}. ${entry.name} (${entry.difficulty}) - ${formatTime(entry.timeMs)} | Lives used: ${entry.livesUsed}</p>`
+    )
+    .join("");
+}
+
+function startSession(playerName, difficulty) {
+  state.playerName = playerName.trim() || "Player";
+  state.difficulty = difficulty;
+  state.gameStarted = true;
+  startScreen.classList.add("hidden");
+  resetGame();
+  showMessage(
+    "Welcome to Eco Quest",
+    `${state.playerName}, begin as Desk Worker (${state.difficulty}). Solve all 5 questions to earn each promotion.`
+  );
+}
+
+function clearQuestionState() {
+  state.optionsState = null;
+  updateHintButtons();
+}
+
+hintBtn.addEventListener("click", useHint);
+if (touchHint) {
+  touchHint.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    useHint();
+  });
+  touchHint.addEventListener(
+    "touchstart",
+    (e) => {
+      e.preventDefault();
+      useHint();
+    },
+    { passive: false }
+  );
+}
+
+difficultyButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const difficulty = btn.dataset.difficulty || "Secondary";
+    startSession(playerNameInput.value, difficulty);
+  });
+});
 
 function hideQuestion() {
   questionModal.classList.add("hidden");
   state.modalOpen = false;
   state.activeNpc = null;
+  clearQuestionState();
 }
 
 function handleAnswer(choice) {
@@ -435,12 +765,19 @@ function handleAnswer(choice) {
     questionFeedback.classList.remove("wrong");
     questionFeedback.textContent = `Correct! ${npc.question.explain}`;
     questionClose.classList.remove("hidden");
+    updateHintButtons();
     updateHUD();
   } else {
     state.streak = 0;
+    state.lives = Math.max(0, state.lives - 1);
     sfx("wrong");
     questionFeedback.classList.add("wrong");
-    questionFeedback.textContent = "Not quite. Try again and think like a strategist.";
+    questionFeedback.textContent = `Not quite. Lives left: ${state.lives}. Try again and think like a strategist.`;
+    if (state.lives === 0) {
+      hideQuestion();
+      endGameWithLoss();
+      return;
+    }
     updateHUD();
   }
 }
@@ -471,22 +808,34 @@ function checkLevelCompletion() {
 
 function finishGame() {
   state.gameOver = true;
+  state.gameOverReason = "win";
   if (state.timerStarted) {
     state.elapsedMs = Date.now() - state.startTime;
   }
 
+  const entries = saveResultEntry();
   endScreen.classList.remove("hidden");
+  endTitle.textContent = "Promotion Complete";
+  endLead.textContent = "You reached CEO and mastered the office ladder.";
   finalTime.textContent = formatTime(state.elapsedMs);
-  finalSummary.textContent = `Questions solved: ${state.questionsAnswered}/25 | Best current streak: x${state.streak}`;
+  const livesUsed = Math.max(0, 3 - state.lives);
+  finalSummary.textContent = `${state.playerName || "Player"} | Difficulty: ${state.difficulty} | Questions solved: ${state.questionsAnswered}/25 | Lives used: ${livesUsed}/3 | Hints used: ${state.hintsUsed}`;
+  drawLeaderboard(entries);
 }
 
 function loadLevel(index) {
   const level = LEVELS[index];
   state.npcs = createNpcSet(level);
+  const levelQuestions = getQuestionBank(index);
+  state.npcs.forEach((npc, i) => {
+    npc.question = levelQuestions[i];
+  });
 
   state.player.x = 10 * TILE;
   state.player.y = 7 * TILE;
+  state.hintsLeft = 2;
   updateHUD();
+  updateHintButtons();
 }
 
 function nearestNpc() {
@@ -509,7 +858,7 @@ function nearestNpc() {
 }
 
 function interact() {
-  if (state.modalOpen || state.gameOver) return;
+  if (state.modalOpen || state.gameOver || !state.gameStarted) return;
   maybeStartTimer();
   enableAudio();
   const npc = nearestNpc();
@@ -527,6 +876,8 @@ function updateHUD() {
   hudLevel.textContent = LEVELS[state.levelIndex].role;
   hudProgress.textContent = `${done}/5`;
   hudStreak.textContent = `x${state.streak}`;
+  hudLives.textContent = String(state.lives);
+  hudHints.textContent = String(state.hintsLeft);
 }
 
 function maybeStartTimer() {
@@ -537,7 +888,7 @@ function maybeStartTimer() {
 }
 
 function movePlayer(dt) {
-  if (state.modalOpen || state.gameOver) {
+  if (state.modalOpen || state.gameOver || !state.gameStarted) {
     return;
   }
 
@@ -855,14 +1206,21 @@ function resetGame() {
   state.elapsedMs = 0;
   state.streak = 0;
   state.questionsAnswered = 0;
+  state.lives = 3;
+  state.hintsLeft = 2;
+  state.hintsUsed = 0;
+  state.gameOverReason = "";
   state.player.facing = "down";
+  clearQuestionState();
 
   endScreen.classList.add("hidden");
   questionModal.classList.add("hidden");
   messageBox.classList.add("hidden");
 
   loadLevel(0);
-  showMessage("Career Start", "Desk Worker role: solve all 5 questions to earn promotion.");
+  if (state.gameStarted) {
+    showMessage("Career Start", "Desk Worker role: solve all 5 questions to earn promotion.");
+  }
 }
 
 window.addEventListener("keydown", (e) => {
@@ -1010,7 +1368,7 @@ messageBtn.addEventListener("keydown", (e) => {
   }
 });
 
-restartBtn.addEventListener("click", resetGame);
+restartBtn.addEventListener("click", () => resetGame());
 
 const fsBtn = document.getElementById("fs-btn");
 function updateViewportHeight() {
@@ -1052,8 +1410,5 @@ document.addEventListener("gesturestart", preventTouchScroll, { passive: false }
 updateViewportHeight();
 
 loadLevel(0);
-showMessage(
-  "Welcome to Eco Quest",
-  "Move to each colleague, press INTERACT, answer correctly, and climb from Desk Worker to CEO."
-);
+updateHintButtons();
 requestAnimationFrame(loop);
